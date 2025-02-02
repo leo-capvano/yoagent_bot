@@ -4,7 +4,7 @@ resource "aws_lambda_permission" "apigw" {
   function_name = module.lambda_yoagent_bot_be.lambda_function_arn
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${aws_api_gateway_rest_api.yoagent_bot_apigw.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_rest_api.yoagent_bot_rest_api.execution_arn}/*/*"
 }
 
 resource "aws_iam_role" "lambda" {

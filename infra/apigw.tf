@@ -1,17 +1,17 @@
-resource "aws_api_gateway_rest_api" "yoagent_bot_apigw" {
+resource "aws_api_gateway_rest_api" "yoagent_bot_rest_api" {
   name        = "yoagent_bot_apigw"
   description = "My awesome HTTP API Gateway for yoagent_bot telegram bot"
   api_key_source = "AUTHORIZER"
 }
 
 resource "aws_api_gateway_resource" "yoagent_resource" {
-  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
-  parent_id   = aws_api_gateway_rest_api.yoagent_bot_apigw.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
+  parent_id   = aws_api_gateway_rest_api.yoagent_bot_rest_api.root_resource_id
   path_part   = "yoagent"
 }
 
 resource "aws_api_gateway_method" "yoagent_method" {
-  rest_api_id   = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+  rest_api_id   = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
   resource_id   = aws_api_gateway_resource.yoagent_resource.id
   http_method   = "POST"
   authorization = "CUSTOM"
@@ -19,8 +19,8 @@ resource "aws_api_gateway_method" "yoagent_method" {
   api_key_required = true
 }
 
-resource "aws_api_gateway_method_settings" "example" {
-  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+resource "aws_api_gateway_method_settings" "yoagent_method_settings" {
+  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
   stage_name  = aws_api_gateway_stage.yoagent_stage1.stage_name
   method_path = "*/*"
 
@@ -34,7 +34,7 @@ resource "aws_api_gateway_method_settings" "example" {
 }
 
 resource "aws_api_gateway_integration" "yoagent_lambda_integration" {
-  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
   resource_id = aws_api_gateway_method.yoagent_method.resource_id
   http_method = aws_api_gateway_method.yoagent_method.http_method
 
@@ -47,13 +47,12 @@ resource "aws_api_gateway_deployment" "yoagent_deployment" {
   depends_on = [
     aws_api_gateway_integration.yoagent_lambda_integration
   ]
-
-  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
 }
 
 resource "aws_api_gateway_stage" "yoagent_stage1" {
   deployment_id = aws_api_gateway_deployment.yoagent_deployment.id
-  rest_api_id   = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+  rest_api_id   = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
   stage_name    = "yoagent_stage1"
 
   access_log_settings {
@@ -106,8 +105,8 @@ resource "aws_iam_role_policy_attachment" "main" {
 }
 
 resource "aws_cloudwatch_log_group" "apigw_cw_log_group" {
-  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.yoagent_bot_apigw.id}/yoagent_stage1"
-  retention_in_days = 1
+  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.yoagent_bot_rest_api.id}/yoagent_stage1"
+  retention_in_days = var.cloudwatch_log_group_retention_in_days
 }
 
 # usage plan
@@ -118,13 +117,13 @@ resource "aws_api_gateway_usage_plan" "yoagent_stage1_usage_plan" {
   product_code = "yoagent_bot"
 
   api_stages {
-    api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+    api_id = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
     stage  = aws_api_gateway_stage.yoagent_stage1.stage_name
   }
 
   quota_settings {
     # max 100 requests per day
-    limit  = 100
+    limit  = var.yoagent_rest_api_max_request_per_day
     period = "DAY"
   }
 
@@ -149,7 +148,7 @@ resource "aws_api_gateway_api_key" "telegram_api_key" {
 
 resource "aws_api_gateway_authorizer" "yoagent_lambda_authorizer" {
   name                   = "yoagent_lambda_authorizer"
-  rest_api_id            = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+  rest_api_id            = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
   authorizer_uri         = module.lambda_yoagent_apigw_authorizer.lambda_function_invoke_arn
   authorizer_credentials = aws_iam_role.authorizer_credentials.arn
   type = "REQUEST"
@@ -192,7 +191,7 @@ data "aws_iam_policy_document" "invocation_policy" {
 # policies
 
 resource "aws_api_gateway_rest_api_policy" "yoagent_resource_policy" {
-  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_rest_api.id
   policy      = data.aws_iam_policy_document.allow_only_from_telegram_subnets.json
 }
 
@@ -217,10 +216,7 @@ data "aws_iam_policy_document" "allow_only_from_telegram_subnets" {
     condition {
       test     = "NotIpAddress"
       variable = "aws:SourceIp"
-      values = [
-        "149.154.160.0/20",
-        "91.108.4.0/22"
-      ]
+      values = var.telegram_ip_whitelist
     }
   }
 }

@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 
 import requests
@@ -16,7 +17,7 @@ def read_secret_token():
 
 parser = argparse.ArgumentParser(description="Set Telegram bot webhook.")
 parser.add_argument("--bot_token", type=str, help="Your Telegram bot token.", default=TELEGRAM_BOT_TOKEN)
-parser.add_argument("--webhook_url", type=str, help="The URL for the webhook.", required=True)
+parser.add_argument("--webhook_url", type=str, help="The URL for the webhook.", required=False)
 parser.add_argument("--max-connections", type=str,
                     help="The maximum allowed number of simultaneous HTTPS connections",
                     default=10)
@@ -46,8 +47,14 @@ def set_webhook(bot_token: str, webhook_url: str, max_connections: str, secret_t
 if __name__ == "__main__":
     args = parser.parse_args()
 
+    webhook_url = args.webhook_url
+    if not webhook_url:
+        with open(os.path.join("..", "infra", "terraform_output.json"), "r", encoding="utf-8-sig") as tf_output_file:
+            tf_output_vars: dict = json.load(tf_output_file)
+            webhook_url = tf_output_vars.get("base_url", {}).get("value", "")
+
     result = set_webhook(args.bot_token,
-                         args.webhook_url,
+                         webhook_url,
                          args.max_connections,
                          args.secret_token)
     if result:
