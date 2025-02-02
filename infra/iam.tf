@@ -6,3 +6,20 @@ resource "aws_lambda_permission" "apigw" {
 
   source_arn = "${aws_api_gateway_rest_api.yoagent_bot_apigw.execution_arn}/*/*"
 }
+
+resource "aws_iam_role" "lambda" {
+  name               = "demo-lambda"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+}
+
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}

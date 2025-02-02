@@ -1,6 +1,7 @@
 resource "aws_api_gateway_rest_api" "yoagent_bot_apigw" {
   name        = "yoagent_bot_apigw"
   description = "My awesome HTTP API Gateway for yoagent_bot telegram bot"
+  api_key_source = "AUTHORIZER"
 }
 
 resource "aws_api_gateway_resource" "yoagent_resource" {
@@ -13,7 +14,23 @@ resource "aws_api_gateway_method" "yoagent_method" {
   rest_api_id   = aws_api_gateway_rest_api.yoagent_bot_apigw.id
   resource_id   = aws_api_gateway_resource.yoagent_resource.id
   http_method   = "POST"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.yoagent_lambda_authorizer.id
+  api_key_required = true
+}
+
+resource "aws_api_gateway_method_settings" "example" {
+  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+  stage_name  = aws_api_gateway_stage.yoagent_stage1.stage_name
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled         = true
+    logging_level          = "INFO"
+    data_trace_enabled     = true
+    throttling_burst_limit = 2
+    throttling_rate_limit  = 2
+  }
 }
 
 resource "aws_api_gateway_integration" "yoagent_lambda_integration" {
@@ -56,19 +73,8 @@ resource "aws_api_gateway_stage" "yoagent_stage1" {
   }
 }
 
-resource "aws_api_gateway_method_settings" "apigw_method_settings" {
-  rest_api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
-  stage_name  = aws_api_gateway_stage.yoagent_stage1.stage_name
-  method_path = "*/*"
+# monitoring
 
-  settings {
-    metrics_enabled = true
-    data_trace_enabled = true
-    logging_level   = "INFO"
-  }
-}
-
-# Allow API Gateway to push logs to CloudWatch
 resource "aws_api_gateway_account" "main" {
   cloudwatch_role_arn = aws_iam_role.main.arn
 }
@@ -104,6 +110,8 @@ resource "aws_cloudwatch_log_group" "apigw_cw_log_group" {
   retention_in_days = 1
 }
 
+# usage plan
+
 resource "aws_api_gateway_usage_plan" "yoagent_stage1_usage_plan" {
   name         = "yoagent_stage1_usage_plan"
   description  = "Usage plan for stage 1 of yoagent_bot"
@@ -125,6 +133,63 @@ resource "aws_api_gateway_usage_plan" "yoagent_stage1_usage_plan" {
     rate_limit = 2 # num of requests per seconds
   }
 }
+
+resource "aws_api_gateway_usage_plan_key" "main" {
+  key_id        = aws_api_gateway_api_key.telegram_api_key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.yoagent_stage1_usage_plan.id
+}
+
+resource "aws_api_gateway_api_key" "telegram_api_key" {
+  name = "telegram_api_key"
+  value = file("../.bot_webhook_secret_token")
+}
+
+# authorizer
+
+resource "aws_api_gateway_authorizer" "yoagent_lambda_authorizer" {
+  name                   = "yoagent_lambda_authorizer"
+  rest_api_id            = aws_api_gateway_rest_api.yoagent_bot_apigw.id
+  authorizer_uri         = module.lambda_yoagent_apigw_authorizer.lambda_function_invoke_arn
+  authorizer_credentials = aws_iam_role.authorizer_credentials.arn
+  type = "REQUEST"
+  identity_source = "method.request.header.X-Telegram-Bot-Api-Secret-Token"
+}
+
+resource "aws_iam_role" "authorizer_credentials" {
+  name               = "api_gateway_auth_invocation"
+  path               = "/"
+  assume_role_policy = data.aws_iam_policy_document.authorizer_credentials_assume_role.json
+}
+
+data "aws_iam_policy_document" "authorizer_credentials_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["apigateway.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role_policy" "invocation_policy" {
+  name   = "invocation_policy"
+  role   = aws_iam_role.authorizer_credentials.id
+  policy = data.aws_iam_policy_document.invocation_policy.json
+}
+
+data "aws_iam_policy_document" "invocation_policy" {
+  statement {
+    effect    = "Allow"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [module.lambda_yoagent_apigw_authorizer.lambda_function_arn]
+  }
+}
+
+# policies
 
 resource "aws_api_gateway_rest_api_policy" "yoagent_resource_policy" {
   rest_api_id = aws_api_gateway_rest_api.yoagent_bot_apigw.id
