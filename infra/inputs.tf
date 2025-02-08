@@ -15,3 +15,34 @@ variable "telegram_ip_whitelist" {
   type = list(string)
   description = "Telegram IPs to whitelist"
 }
+
+variable "lambda_authorizer_identity_source" {
+  default = "method.request.header.X-Telegram-Bot-Api-Secret-Token"
+  type = string
+  description = "The identity source of the lambda authorizer"
+}
+
+variable "telegram_bot_webhook_secret_token_header_key" {
+  default = "X-Telegram-Bot-Api-Secret-Token"
+  type = string
+  description = "The name of the header that contains the webhook token"
+}
+
+variable "telegram_webhook_token_file" {
+  default = "../.bot_webhook_secret_token"
+  type = string
+  description = "The file containing the telegram webhook secret token"
+}
+
+variable "telegram_bot_token_file" {
+  default = "../.bot_token"
+  type = string
+  description = "The file containing the telegram secret token"
+}
+
+variable "authorization_secret_file" {
+  default = "../.authorization_secret"
+  type = string
+  description = "The file containing the secret sent by the authorizer"
+}
+

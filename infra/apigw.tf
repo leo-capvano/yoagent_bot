@@ -152,7 +152,7 @@ resource "aws_api_gateway_authorizer" "yoagent_lambda_authorizer" {
   authorizer_uri         = module.lambda_yoagent_apigw_authorizer.lambda_function_invoke_arn
   authorizer_credentials = aws_iam_role.authorizer_credentials.arn
   type = "REQUEST"
-  identity_source = "method.request.header.X-Telegram-Bot-Api-Secret-Token"
+  identity_source = var.lambda_authorizer_identity_source
 }
 
 resource "aws_iam_role" "authorizer_credentials" {
