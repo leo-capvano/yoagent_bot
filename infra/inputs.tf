@@ -28,7 +28,7 @@ variable "telegram_bot_webhook_secret_token_header_key" {
   description = "The name of the header that contains the webhook token"
 }
 
-variable "telegram_webhook_token_file" {
+variable "telegram_bot_webhook_token_file" {
   default = "../.bot_webhook_secret_token"
   type = string
   description = "The file containing the telegram webhook secret token"

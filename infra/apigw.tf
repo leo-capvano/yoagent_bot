@@ -141,7 +141,7 @@ resource "aws_api_gateway_usage_plan_key" "main" {
 
 resource "aws_api_gateway_api_key" "telegram_api_key" {
   name = "telegram_api_key"
-  value = file("../.bot_webhook_secret_token")
+  value = file(var.telegram_bot_webhook_token_file)
 }
 
 # authorizer

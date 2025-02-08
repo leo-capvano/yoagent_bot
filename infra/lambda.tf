@@ -27,7 +27,7 @@ module "lambda_yoagent_bot_be" {
 
   environment_variables = {
     TELEGRAM_BOT_TOKEN = file(var.telegram_bot_token_file)
-    BOT_WEBHOOK_SECRET_TOKEN = file(var.telegram_webhook_token_file)
+    BOT_WEBHOOK_SECRET_TOKEN = file(var.telegram_bot_webhook_token_file)
     BOT_WEBHOOK_SECRET_TOKEN_HEADER_KEY = var.telegram_bot_webhook_secret_token_header_key
     AUTHORIZATION_SECRET = file(var.authorization_secret_file)
   }
@@ -47,7 +47,7 @@ module "lambda_yoagent_apigw_authorizer" {
   cloudwatch_logs_retention_in_days = 1
 
   environment_variables = {
-    BOT_WEBHOOK_SECRET_TOKEN = file(var.telegram_webhook_token_file)
+    BOT_WEBHOOK_SECRET_TOKEN = file(var.telegram_bot_webhook_token_file)
     BOT_WEBHOOK_SECRET_TOKEN_HEADER_KEY = var.telegram_bot_webhook_secret_token_header_key
     AUTHORIZATION_SECRET = file(var.authorization_secret_file)
   }
