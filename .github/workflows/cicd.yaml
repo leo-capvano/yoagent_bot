@@ -1,0 +1,43 @@
+name: CI Workflow
+
+on:
+  workflow_dispatch: # manual run
+
+jobs:
+  terraform-build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: latest
+
+      - name: Terraform Init
+        uses: terraform init
+
+      - name: Terraform Validate
+        uses: terraform validate
+
+      - name: Terraform Plan
+        uses: terraform plan
+
+      - name: Terraform Apply
+        uses: terraform apply --auto-approve
+
+      - name: Terraform Output
+        uses: terraform output -json > terraform_output.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Register bot
+        run: python telegram.py
