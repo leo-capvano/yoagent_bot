@@ -17,19 +17,19 @@ jobs:
           terraform_version: latest
 
       - name: Terraform Init
-        uses: terraform init
+        run: terraform init
 
       - name: Terraform Validate
-        uses: terraform validate
+        run: terraform validate
 
       - name: Terraform Plan
-        uses: terraform plan
+        run: terraform plan
 
       - name: Terraform Apply
-        uses: terraform apply --auto-approve
+        run: terraform apply --auto-approve
 
       - name: Terraform Output
-        uses: terraform output -json > terraform_output.json
+        run: terraform output -json > terraform_output.json
 
       - name: Setup Python
         uses: actions/setup-python@v4
