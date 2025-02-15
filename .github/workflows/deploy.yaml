@@ -18,18 +18,23 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: infra/
 
       - name: Terraform Validate
         run: terraform validate
+        working-directory: infra/
 
       - name: Terraform Plan
         run: terraform plan
+        working-directory: infra/
 
       - name: Terraform Apply
         run: terraform apply --auto-approve
+        working-directory: infra/
 
       - name: Terraform Output
         run: terraform output -json > terraform_output.json
+        working-directory: infra/
 
       - name: Setup Python
         uses: actions/setup-python@v4
