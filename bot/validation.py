@@ -15,6 +15,6 @@ def is_authorization_secret_correct(event: dict):
     return True
 
 
-def is_bot_authorization_token_valid(event):
+def is_bot_authorization_token_not_valid(event):
     return "headers" not in event or BOT_WEBHOOK_SECRET_TOKEN_HEADER_KEY not in event["headers"] or event["headers"][
         BOT_WEBHOOK_SECRET_TOKEN_HEADER_KEY] != BOT_WEBHOOK_SECRET_TOKEN

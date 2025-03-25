@@ -3,7 +3,7 @@ import os
 
 import urllib3
 
-from validation import is_authorization_secret_correct, is_bot_authorization_token_valid
+from validation import is_authorization_secret_correct, is_bot_authorization_token_not_valid
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
@@ -16,7 +16,7 @@ def lambda_handler(event, context):
         print(f"Call not authorized - authorization secret not valid!")
         return not_authorized('Call not authorized! Authorization secret not valid!')
 
-    if is_bot_authorization_token_valid(event):
+    if is_bot_authorization_token_not_valid(event):
         print(f"Call not authorized - Telegram secret token invalid")
         return not_authorized('Call not authorized! Secret Token Invalid')
 

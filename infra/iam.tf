@@ -8,7 +8,7 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_iam_role" "lambda" {
-  name               = "demo-lambda"
+  name               = "allow_lambda"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
