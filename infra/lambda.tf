@@ -20,8 +20,8 @@ module "lambda_yoagent_bot_be" {
 
   create_lambda_function_url = false
 
-  create_package             = false
-  local_existing_package     = local.lambda_yoagent_bot_be_zip_file_name
+  create_package         = false
+  local_existing_package = local.lambda_yoagent_bot_be_zip_file_name
 
   cloudwatch_logs_retention_in_days = 1
 

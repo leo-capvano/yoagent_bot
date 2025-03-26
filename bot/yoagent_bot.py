@@ -3,6 +3,7 @@ import os
 
 import urllib3
 
+from secrets_manager_svc import get_secret
 from validation import is_authorization_secret_correct, is_bot_authorization_token_not_valid
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -22,12 +23,14 @@ def lambda_handler(event, context):
 
     body = json.loads(event['body'])
     chat_id = body['message']['chat']['id']
-    user_name = body['message']['from']['username']
+    username = body['message']['from']['username']
     message_text = body['message']['text']
+    llm_api_key = get_secret(f"llm_api_key/{username}")
 
     print(f"*** chat id: {chat_id}")
-    print(f"*** user name: {user_name}")
+    print(f"*** user name: {username}")
     print(f"*** message text: {message_text}")
+    print(f"*** llm api key {llm_api_key}")
     print(json.dumps(body))
 
     reply_message = f"Reply to {message_text}"

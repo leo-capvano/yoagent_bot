@@ -1,3 +1,4 @@
+# Give API GW Permission to invoke lambda
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
@@ -22,4 +23,29 @@ data "aws_iam_policy_document" "lambda_assume_role" {
       identifiers = ["lambda.amazonaws.com"]
     }
   }
+}
+
+# IAM policy used by lambda bot to access SecretsManager and retrieve LLM API Key
+resource "aws_iam_policy" "secrets_manager_access" {
+  name        = "SecretsManagerAccessPolicy"
+  description = "Allows Lambda to access AWS Secrets Manager"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = aws_secretsmanager_secret.llm_api_key_secret.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_secrets_manager" {
+  policy_arn = aws_iam_policy.secrets_manager_access.arn
+  role       = module.lambda_yoagent_bot_be.lambda_role_name
 }
