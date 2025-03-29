@@ -4,6 +4,18 @@ variable "yoagent_rest_api_max_request_per_day" {
   description = "The maximum number of requests per day for the API"
 }
 
+variable "yoagent_rest_api_burst_limit" {
+  default     = 100
+  type        = number
+  description = "Number of concurrent requests to hold in the buffer"
+}
+
+variable "yoagent_rest_api_rate_limit" {
+  default     = 10
+  type        = number
+  description = "Number of concurrent requests to process per second"
+}
+
 variable "cloudwatch_log_group_retention_in_days" {
   default     = 1
   type        = number
@@ -46,14 +58,19 @@ variable "authorization_secret_file" {
   description = "The file containing the secret sent by the authorizer"
 }
 
-variable "llm_api_key_admin_username_secret_name" {
-  description = "The name of the admin username of Telegram to create secret in AWS Secrets Manager that contains the LLM API Key"
-  type        = string
-}
-
 variable "file_path_containing_llm_api_key" {
   description = "The path to the file containing the LLM API Key"
   type        = string
   default     = "../.llm_api_key"
+}
+
+variable "default_admin_user" {
+  type        = string
+  description = "The default admin username that will be allowed to use the bot as admin"
+}
+
+variable "users_table_name" {
+  type    = string
+  default = "Users"
 }
 

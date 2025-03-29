@@ -16,3 +16,6 @@ Remember to input the admin username; the script will create a secret containing
 > (for Winodws)  
 > terraform destroy --auto-approve ; terraform apply -auto-approve; terraform output -json | Out-File -Encoding utf8 terraform_output.json
 2. execute the given python script [telegram.py](..%2Ftelegram%2Ftelegram.py)
+
+# Get Webhook Info
+> https://api.telegram.org/bot<<secretbot_token>>/getWebhookInfo

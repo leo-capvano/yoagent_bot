@@ -6,7 +6,7 @@ provider "archive" {}
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "../bot/"
+  source_dir  = "../src/bot/"
   output_path = local.lambda_yoagent_bot_be_zip_file_name
 }
 
@@ -30,6 +30,7 @@ module "lambda_yoagent_bot_be" {
     BOT_WEBHOOK_SECRET_TOKEN = file(var.telegram_bot_webhook_token_file)
     BOT_WEBHOOK_SECRET_TOKEN_HEADER_KEY = var.telegram_bot_webhook_secret_token_header_key
     AUTHORIZATION_SECRET = file(var.authorization_secret_file)
+    USERS_TABLE_NAME                    = var.users_table_name
   }
 }
 

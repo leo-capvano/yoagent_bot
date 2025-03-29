@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "llm_api_key_secret" {
-  name = "llm_api_key/${var.llm_api_key_admin_username_secret_name}"
+  name = "llm_api_key"
   recovery_window_in_days = 0
 }
 

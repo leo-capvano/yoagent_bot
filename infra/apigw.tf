@@ -28,8 +28,8 @@ resource "aws_api_gateway_method_settings" "yoagent_method_settings" {
     metrics_enabled         = true
     logging_level          = "INFO"
     data_trace_enabled     = true
-    throttling_burst_limit = 2
-    throttling_rate_limit  = 2
+    throttling_burst_limit = var.yoagent_rest_api_burst_limit
+    throttling_rate_limit  = var.yoagent_rest_api_rate_limit
   }
 }
 
@@ -128,8 +128,8 @@ resource "aws_api_gateway_usage_plan" "yoagent_stage1_usage_plan" {
   }
 
   throttle_settings {
-    burst_limit = 2 # num of concurrent requests
-    rate_limit = 2 # num of requests per seconds
+    burst_limit = var.yoagent_rest_api_burst_limit
+    rate_limit = var.yoagent_rest_api_rate_limit
   }
 }
 
