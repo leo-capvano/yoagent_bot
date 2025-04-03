@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class MessageFrom:
-    username: str
+    user_id: str
 
 
 @dataclass

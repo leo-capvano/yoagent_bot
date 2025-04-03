@@ -15,6 +15,8 @@ Remember to input the admin username; the script will create a secret containing
 (e.g. for **@myTelegramUsername** input **myTelegramUsername**)
 > (for Winodws)  
 > terraform destroy --auto-approve ; terraform apply -auto-approve; terraform output -json | Out-File -Encoding utf8 terraform_output.json
+
+(this command produces a file called terraform_output.json that will be read by the ned step's script)
 2. execute the given python script [telegram.py](..%2Ftelegram%2Ftelegram.py)
 
 # Get Webhook Info

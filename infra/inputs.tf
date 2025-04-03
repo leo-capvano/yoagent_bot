@@ -66,11 +66,16 @@ variable "file_path_containing_llm_api_key" {
 
 variable "default_admin_user" {
   type        = string
-  description = "The default admin username that will be allowed to use the bot as admin"
+  description = "The default admin user_id that will be allowed to use the bot as admin"
 }
 
 variable "users_table_name" {
   type    = string
   default = "Users"
+}
+
+variable "lambda_yoagent_bot_be_timeout" {
+  description = "The timeout of the lambda function that runs you bot"
+  default = 60
 }
 
