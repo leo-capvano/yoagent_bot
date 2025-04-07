@@ -1,3 +1,4 @@
+# Give API GW Permission to invoke lambda
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
@@ -8,18 +9,71 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_iam_role" "lambda" {
-  name               = "demo-lambda"
+  name               = "allow_lambda"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = ["sts:AssumeRole"]
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = ["lambda.amazonaws.com"]
     }
   }
+}
+
+# IAM policy used by lambda bot to access SecretsManager and retrieve LLM API Key
+resource "aws_iam_policy" "secrets_manager_access" {
+  name        = "SecretsManagerAccessPolicy"
+  description = "Allows Lambda to access AWS Secrets Manager"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = aws_secretsmanager_secret.llm_api_key_secret.arn
+      }
+    ]
+  })
+}
+resource "aws_iam_role_policy_attachment" "lambda_secrets_manager" {
+  policy_arn = aws_iam_policy.secrets_manager_access.arn
+  role       = module.lambda_yoagent_bot_be.lambda_role_name
+}
+
+# IAM policy used by lambda bot to access DynamoDB Users table and retrieve User details
+resource "aws_iam_policy" "dynamodb_access" {
+  name        = "DynamoDBAccessPolicy"
+  description = "Allows Lambda to access DynamoDB Users table"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Scan",
+          "dynamodb:Query"
+        ]
+        Resource = aws_dynamodb_table.users_table.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_dynamodb_users_table" {
+  policy_arn = aws_iam_policy.dynamodb_access.arn
+  role       = module.lambda_yoagent_bot_be.lambda_role_name
 }

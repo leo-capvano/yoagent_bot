@@ -28,11 +28,13 @@ parser.add_argument("--secret-token", type=str,
                     The header is useful to ensure that the request comes from a webhook set by you.
                     """,
                     default=read_secret_token())
+parser.add_argument("--drop_pending_updates", help="True to drop all pending updates", default=True)
 
 
-def set_webhook(bot_token: str, webhook_url: str, max_connections: str, secret_token: str):
+def set_webhook(bot_token: str, webhook_url: str, max_connections: str, secret_token: str, drop_pending_updates: bool):
     api_url = f"https://api.telegram.org/bot{bot_token}/setWebhook"
-    params = {"url": webhook_url, "max_connections": max_connections, "secret_token": secret_token}
+    params = {"url": webhook_url, "max_connections": max_connections, "secret_token": secret_token,
+              "drop_pending_updates": drop_pending_updates}
     # print(f"setting webhooks using params: {params}")
     try:
         response = requests.post(api_url, params=params)
@@ -56,7 +58,8 @@ if __name__ == "__main__":
     result = set_webhook(args.bot_token,
                          webhook_url,
                          args.max_connections,
-                         args.secret_token)
+                         args.secret_token,
+                         args.drop_pending_updates)
     if result:
         print("Webhook set successfully:", result)
     else:
