@@ -76,6 +76,11 @@ variable "users_table_name" {
 
 variable "lambda_yoagent_bot_be_timeout" {
   description = "The timeout of the lambda function that runs you bot"
-  default = 60
+  default     = 60
+}
+
+variable "brave_api_key_file" {
+  description = "File path containing brave api key"
+  default     = "../.brave_api_key"
 }
 

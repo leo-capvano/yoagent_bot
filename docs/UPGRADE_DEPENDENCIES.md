@@ -11,19 +11,21 @@ Use `pip` to install the updated dependencies, specifying the `manylinux2014` pl
 
 Run the following command (adjusting the packages as needed):
 ```sh
-pip install --platform manylinux2014_x86_64 --target=layer/python/lib/python3.12/site-packages/ --only-binary=:all: langchain langgraph langchain-openai [...]
+pip install --platform manylinux2014_x86_64 --target=../infra/layer/requirements_layer/python/lib/python3.12/site-packages/ --only-binary=:all: -r ../src/requirements.txt
 ```
+Requirements file: [requirements.txt](../src/requirements.txt)
 This installs the required dependencies into the correct folder structure for Lambda.
 
 ### **2. Package the Dependencies**
-After installing the dependencies, zip the contents of the `layer/python/lib/python3.12/site-packages/` folder into a new **bot_layer.zip**.
+After installing the dependencies, zip the contents of the `infra/layer/requirements_layer/python/lib/python3.12/site-packages/` folder into a new **requirements_layer.zip**.
 ```sh
-zip -r bot_layer.zip layer/python/lib/python3.12/site-packages/*
+zip -r ../infra/layer/requirements_layer.zip ..infra/layer/requirements_layer/python/lib/python3.12/site-packages/*
 ```
 Make sure all the files from the `site-packages/` folder are included in the zip archive.
 
+
 ### **3. Apply Terraform**
-Once the updated `bot_layer.zip` is ready, apply the Terraform configuration to deploy the updated layer to AWS Lambda.
+Once the updated `requirements_layer.zip` is ready, apply the Terraform configuration to deploy the updated layer to AWS Lambda.
 ```sh
 terraform apply -auto-approve
 ```
