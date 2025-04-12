@@ -18,6 +18,7 @@ In the project's root directory you can find:
 - [.bot_webhook_secret_token.example](../.bot_webhook_secret_token.example) -> contains a secret that Telegram servers will send inside the webhook request. It is used to verify that the request is sent by your Telegram API registration call (this value is included when you call the Telegram API to register the webhook)  
 - [.llm_api_key.example](../.llm_api_key.example) -> contains the OPENAI_API_KEY's value that will be loaded by the bot. Support for other models can be added later
 - [.authorization_secret.example](../.authorization_secret.example) -> the secret that is included when lambda authorizer forwards the request to the upstream. Double layered check to verify that the request is coming from lambda authorizer
+- [.brave_api_key.example](../.brave_api_key.example) -> the secret containing Brave API key used by LLM Agent to search online
 
 Rename those files by removing the suffix **.example** and run .tf scripts.
 
