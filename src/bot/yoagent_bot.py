@@ -1,8 +1,5 @@
 import json
-import os
 import traceback
-
-import urllib3
 
 from dto.error.FromError import FromNotPresentError
 from dto.error.TextNotPresentError import TextNotPresentError
@@ -10,9 +7,8 @@ from dto.parser import parse_dto, parse_status_change
 from dto.update import Update
 from dynamodb_svc import is_user_allowed
 from graph_svc import invoke_graph
+from telegram_svc import send_reply, bot_is_typing
 from validation import is_authorization_secret_correct, is_bot_authorization_token_not_valid
-
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 
 def lambda_handler(event, context):
@@ -34,23 +30,24 @@ def lambda_handler(event, context):
             return handle_status_change(status_change)
 
         update_dto: Update = parse_dto(dto)
-        if is_user_allowed(update_dto.message.message_from.user_id):
+        with bot_is_typing(update_dto.message.chat.id):
+            if is_user_allowed(update_dto.message.message_from.user_id):
 
-            print(f"*** chat id: {update_dto.message.chat.id}")
-            print(f"*** user name: {update_dto.message.message_from.user_id}")
-            print(f"*** message text: {update_dto.message.text}")
-            print(json.dumps(dto))
+                print(f"*** chat id: {update_dto.message.chat.id}")
+                print(f"*** user name: {update_dto.message.message_from.user_id}")
+                print(f"*** message text: {update_dto.message.text}")
+                print(json.dumps(dto))
 
-            agent_response = invoke_graph(update_dto.message.text)
+                agent_response = invoke_graph(update_dto.message.text)
 
-            send_reply(update_dto.message.chat.id, agent_response)
-            return exit_bot("Message processed successfully", 200)
-        else:
-            print(
-                f"Call not authorized - user {update_dto.message.message_from.user_id} is not authorized to use this bot!")
-            send_reply(update_dto.message.chat.id,
-                       "You are not authorized to use this bot, contact the administrator to register for use! Cacc e sord")
-            return exit_bot(f"User {update_dto.message.message_from.user_id} not allowed to use this bot!", 298)
+                send_reply(update_dto.message.chat.id, agent_response)
+                return exit_bot("Message processed successfully", 200)
+            else:
+                print(
+                    f"Call not authorized - user {update_dto.message.message_from.user_id} is not authorized to use this bot!")
+                send_reply(update_dto.message.chat.id,
+                           "You are not authorized to use this bot, contact the administrator to register for use! Cacc e sord")
+                return exit_bot(f"User {update_dto.message.message_from.user_id} not allowed to use this bot!", 298)
     except FromNotPresentError as fnpe:
         traceback.print_exc()
         send_reply(fnpe.get_message(), "Message type not supported")
@@ -79,20 +76,6 @@ def exit_bot(message: str, status_code: int) -> dict:
         'statusCode': status_code,
         'body': json.dumps(message)
     }
-
-
-def send_reply(chat_id, message):
-    reply = {
-        "chat_id": chat_id,
-        "text": message
-    }
-
-    http = urllib3.PoolManager()
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    encoded_data = json.dumps(reply).encode('utf-8')
-    http.request('POST', url, body=encoded_data, headers={'Content-Type': 'application/json'})
-
-    print(f"*** Reply : {encoded_data}")
 
 
 if __name__ == '__main__':

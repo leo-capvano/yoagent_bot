@@ -28,7 +28,7 @@ Run the **Terraform module** to create the necessary infrastructure, including t
 
 #### **Windows Command**
 ```sh
-terraform destroy --auto-approve ; terraform apply -auto-approve; terraform output -json | Out-File -Encoding utf8 terraform_output.json
+cd ../infra ; terraform destroy --auto-approve ; terraform apply -auto-approve; terraform output -json | Out-File -Encoding utf8 terraform_output.json
 ```
 #### **Linux Command**
 ```sh
@@ -38,6 +38,11 @@ This command will:
 - Destroy any existing infrastructure (if necessary).
 - Deploy the new infrastructure.
 - Generate a **terraform_output.json** file, which will be used in the next step.
+
+While applying Terraform code the script will prompt for an "admin user" that will be automatically registered as
+whitelisted user of the bot:
+- you will need to enter a valid Telegram user ID
+- you can retrieve you Telegram user ID using another bot named @userinfobot (just /start it and it will display your user ID)
 
 ### **2. Register the Webhook with Telegram**
 Run the provided Python script to register the webhook:
